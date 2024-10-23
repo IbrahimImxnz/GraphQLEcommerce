@@ -9,9 +9,26 @@ connectDB();
 
 app.use(
   "/graphql",
-  graphqlHTTP({
-    schema: userSchema,
-    graphiql: true,
+  graphqlHTTP((req, res) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split("")[1];
+
+    let user = null;
+    if (token) {
+      try {
+        user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      } catch (err) {
+        console.error("Invalid token");
+      }
+    }
+
+    return {
+      schema: userSchema,
+      context: { user },
+      graphiql: {
+        headerEditorEnabled: true, // Enable the headers editor
+      },
+    };
   })
 );
 
