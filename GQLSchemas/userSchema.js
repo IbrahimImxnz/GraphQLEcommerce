@@ -134,14 +134,26 @@ const Mutation = new GraphQLObjectType({
       type: UserType,
       description: "update",
       args: {
-        useranme: { type: GraphQLString },
+        username: { type: GraphQLString },
         password: { type: GraphQLString },
-        email: { type: GraphQLString },
       },
       async resolve(parent, args, context) {
         if (!context.user) {
           throw new Error("Unauthorized");
         }
+        const user = await Users.findById(context.user.id);
+        if (!user) {
+          throw new Error("User does not exist");
+        }
+
+        if (args.username) {
+          user.username = args.username;
+        }
+        if (args.password) {
+          user.password = args.password;
+        }
+        await user.save();
+        return user;
       },
     },
   }),
