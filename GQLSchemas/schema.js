@@ -7,6 +7,7 @@ const {
   GraphQLList,
   GraphQLNonNull,
   graphql,
+  GraphQLFloat,
 } = require("graphql");
 const { generateAccessToken } = require("../util/jwtAuthenticator");
 require("dotenv").config();
@@ -23,6 +24,23 @@ const UserType = new GraphQLObjectType({
     username: { type: GraphQLNonNull(GraphQLString) },
     email: { type: GraphQLNonNull(GraphQLString) },
     role: { type: GraphQLString },
+    basket: {
+      type: new GraphQLList(ProductType),
+      async resolve(parent, args, context) {
+        const user = await Users.findById(context.user.id).populate("basket");
+        return user.basket;
+      },
+    },
+    sum: {
+      type: GraphQLFloat,
+      async resolve(parent, args, context) {
+        const user = await Users.findById(context.user.id).populate("basket");
+        const basket = user.basket;
+        const total = basket.reduce((sum, item) => sum + item.price, 0);
+        return total;
+      },
+    },
+    productDescription: { type: GraphQLString },
   }),
 });
 
@@ -34,6 +52,15 @@ const ProductType = new GraphQLObjectType({
     name: { type: GraphQLNonNull(GraphQLString) },
     count: { type: GraphQLNonNull(GraphQLInt) },
     manager: { type: GraphQLNonNull(GraphQLID) },
+    price: { type: GraphQLNonNull(GraphQLFloat) },
+  }),
+});
+
+const Checkout = new GraphQLObjectType({
+  name: "Checkout",
+  fields: () => ({
+    basket: { type: GraphQLList(ProductType) },
+    sum: { type: GraphQLFloat },
   }),
 });
 
@@ -121,6 +148,23 @@ const RootQuery = new GraphQLObjectType({
         }
 
         return user.basket;
+      },
+    },
+    Checkout: {
+      type: Checkout,
+      description: "User checkout",
+      async resolve(parent, args, context) {
+        if (!context.user) {
+          throw new Error("Unauthorized");
+        }
+        const user = await Users.findById(context.user.id).populate("basket");
+        const basket = user.basket;
+        const total = basket.reduce((sum, item) => sum + item.price, 0);
+
+        return {
+          basket: basket,
+          sum: total,
+        };
       },
     },
   }),
@@ -282,6 +326,7 @@ const Mutation = new GraphQLObjectType({
       args: {
         name: { type: GraphQLNonNull(GraphQLString) },
         count: { type: GraphQLNonNull(GraphQLInt) },
+        price: { type: GraphQLNonNull(GraphQLFloat) },
       },
       async resolve(parent, args, context) {
         if (!context.user) {
@@ -298,6 +343,7 @@ const Mutation = new GraphQLObjectType({
           name: args.name,
           count: args.count,
           manager: context.user.id,
+          price: args.price,
         });
         return product;
       },
@@ -345,3 +391,10 @@ module.exports = new GraphQLSchema({
   query: RootQuery,
   mutation: Mutation,
 });
+
+// todo remove prodcts
+// todo remove basket
+// todo restock
+// todo delete user
+// todo logout
+// todo

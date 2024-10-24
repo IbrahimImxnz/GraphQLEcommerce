@@ -26,6 +26,7 @@ const userSchema = mongoose.Schema(
       default: "user",
     },
     basket: [{ type: mongoose.Types.ObjectId, ref: "Products" }],
+    sum: Number,
     productDescription: String,
   },
   { timestamps: true }
