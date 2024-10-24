@@ -3,7 +3,7 @@ const app = express();
 require("dotenv").config();
 const connectDB = require("./config");
 const { graphqlHTTP } = require("express-graphql");
-const userSchema = require("./GQLSchemas/userSchema");
+const userSchema = require("./GQLSchemas/schema");
 const jwt = require("jsonwebtoken");
 
 connectDB();
@@ -24,7 +24,7 @@ app.use(
     }
 
     return {
-      schema: userSchema,
+      schema: schema,
       context: { user },
       graphiql: {
         headerEditorEnabled: true, // Enable the headers editor

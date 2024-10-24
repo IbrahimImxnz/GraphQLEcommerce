@@ -25,6 +25,8 @@ const userSchema = mongoose.Schema(
       enum: ["user", "admin", "manager"],
       default: "user",
     },
+    basket: [{ type: mongoose.Types.ObjectId, ref: "Products" }],
+    productDescription: String,
   },
   { timestamps: true }
 );
