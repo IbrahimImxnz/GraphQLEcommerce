@@ -20,6 +20,7 @@ const sendMail = require("../util/sendEmail");
 const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 const redis = require("redis");
 const Orders = require("../models/orders");
+const sendOrderConfirmation = require("../util/sendOrderConfirmation");
 
 const redisClient = redis.createClient(process.env.REDIS_URL);
 
@@ -517,6 +518,15 @@ const Mutation = new GraphQLObjectType({
             description: `${user.email} is charged with ${total} EUR`,
           });
 
+          await Orders.create({
+            transactionId: charge.id,
+            userCharged: user._id,
+            amount: total,
+          });
+          console.log("new order added");
+
+          sendOrderConfirmation(user.email, charge.id);
+
           return {
             status: charge.status,
             transactionId: charge.id,
@@ -562,6 +572,42 @@ const Mutation = new GraphQLObjectType({
           throw new Error("User does not exist");
         }
         await deletedUser.remove();
+      },
+    },
+    refundPayment: {
+      type: GraphQLBoolean,
+      description: "Refund a payment to its purchaser",
+      args: {
+        transactionId: { type: GraphQLNonNull(GraphQLString) },
+        reason: { type: GraphQLString },
+      },
+      async resolve(parent, args, context) {
+        if (!context.user) {
+          throw new Error("Unauthorized");
+        }
+        const user = await Users.findById(context.user.id);
+        if (!user) {
+          throw new Error("User not found");
+        }
+        if (user.role !== "manager") {
+          throw new Error("User is not a manager");
+        }
+        const order = await Orders.findOne({
+          transactionId: args.transactionId,
+        });
+        try {
+          const refund = await stripe.refunds.create({
+            charge: args.transactionId,
+            reason: args.reason,
+          });
+
+          order.refunded = true;
+          await order.save();
+
+          return refund.status === "succeeded";
+        } catch (err) {
+          throw new Error(err.message);
+        }
       },
     },
   }),
