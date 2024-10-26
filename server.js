@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 
 connectDB();
 
+// app.use(checkToken)
 app.use(
   "/",
   graphqlHTTP((req, res) => {
@@ -25,7 +26,7 @@ app.use(
 
     return {
       schema: schema,
-      context: { user },
+      context: { user, token },
       graphiql: {
         headerEditorEnabled: true, // Enable the headers editor
       },

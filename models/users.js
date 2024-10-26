@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const Product = require("../models/products");
 
 const userSchema = mongoose.Schema(
   {
@@ -38,5 +39,15 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
+
+userSchema.pre("remove", async function (next) {
+  const userId = this._id;
+  try {
+    await Product.deleteMany({ userId });
+    next();
+  } catch (err) {
+    next(err);
+  }
+}); // cascading delete to delete any products if user is deleted
 
 module.exports = mongoose.model("Users", userSchema);

@@ -8,6 +8,8 @@ const {
   GraphQLNonNull,
   graphql,
   GraphQLFloat,
+  GraphQLInputObjectType,
+  GraphQLBoolean,
 } = require("graphql");
 const { generateAccessToken } = require("../util/jwtAuthenticator");
 require("dotenv").config();
@@ -15,6 +17,34 @@ const bcrypt = require("bcrypt");
 const Users = require("../models/users");
 const Products = require("../models/products");
 const sendMail = require("../util/sendEmail");
+const stripe = require("stripe")(process.env.STRIPE_API_KEY);
+const redis = require("redis");
+const Orders = require("../models/orders");
+
+const redisClient = redis.createClient(process.env.REDIS_URL);
+
+(async () => {
+  await redisClient.connect();
+})();
+
+redisClient.on("ready", () => {
+  console.log("Redis connected");
+});
+
+redisClient.on("error", (err) => {
+  console.log(err);
+});
+
+const checkToken = async (token) => {
+  if (!token) {
+    throw new Error("Unauthorized");
+  }
+
+  const isBlacklisted = await redisClient.get(token);
+  if (isBlacklisted) {
+    throw new Error("Token is blacklisted");
+  }
+};
 
 const UserType = new GraphQLObjectType({
   name: "User",
@@ -56,11 +86,20 @@ const ProductType = new GraphQLObjectType({
   }),
 });
 
-const Checkout = new GraphQLObjectType({
-  name: "Checkout",
+const CheckoutPayload = new GraphQLObjectType({
+  name: "CheckoutPayload",
   fields: () => ({
     basket: { type: GraphQLList(ProductType) },
     sum: { type: GraphQLFloat },
+  }),
+});
+
+const PaymentPayload = new GraphQLObjectType({
+  name: "PaymentPayload",
+  fields: () => ({
+    status: { type: GraphQLString },
+    transactionId: { type: GraphQLString },
+    amount: { type: GraphQLFloat },
   }),
 });
 
@@ -84,6 +123,7 @@ const RootQuery = new GraphQLObjectType({
         id: { type: GraphQLID },
       },
       async resolve(parent, args, context) {
+        checkToken(context.token);
         if (!context.user) {
           throw new Error("Unauthorized");
         }
@@ -102,6 +142,7 @@ const RootQuery = new GraphQLObjectType({
       type: new GraphQLList(UserType),
       description: "All Users",
       async resolve(parent, args, context) {
+        checkToken(context.token);
         if (!context.user) {
           throw new Error("Unauthorized");
         }
@@ -129,6 +170,7 @@ const RootQuery = new GraphQLObjectType({
         manager: { type: GraphQLNonNull(GraphQLID) },
       },
       resolve(parent, args, context) {
+        checkToken(context.token);
         if (!context.user) {
           throw new Error("Unauthorized");
         }
@@ -139,6 +181,7 @@ const RootQuery = new GraphQLObjectType({
       type: new GraphQLList(ProductType),
       description: "User basket",
       async resolve(parent, args, context) {
+        checkToken(context.token);
         if (!context.user) {
           throw new Error("Unauthorized");
         }
@@ -151,9 +194,10 @@ const RootQuery = new GraphQLObjectType({
       },
     },
     Checkout: {
-      type: Checkout,
+      type: CheckoutPayload,
       description: "User checkout",
       async resolve(parent, args, context) {
+        checkToken(context.token);
         if (!context.user) {
           throw new Error("Unauthorized");
         }
@@ -259,6 +303,7 @@ const Mutation = new GraphQLObjectType({
         code: { type: GraphQLInt },
       },
       async resolve(parent, args, context) {
+        checkToken(context.token);
         if (!context.user) {
           throw new Error("Unauthorized");
         }
@@ -297,6 +342,7 @@ const Mutation = new GraphQLObjectType({
         productDescription: { type: GraphQLString },
       },
       async resolve(parent, args, context) {
+        checkToken(context.token);
         if (!context.user) {
           throw new Error("Unauthorized");
         }
@@ -329,6 +375,7 @@ const Mutation = new GraphQLObjectType({
         price: { type: GraphQLNonNull(GraphQLFloat) },
       },
       async resolve(parent, args, context) {
+        checkToken(context.token);
         if (!context.user) {
           throw new Error("Unauthorized");
         }
@@ -348,6 +395,36 @@ const Mutation = new GraphQLObjectType({
         return product;
       },
     },
+    changeProductDetails: {
+      type: ProductType,
+      description: "Add a new product",
+      args: {
+        name: { type: GraphQLNonNull(GraphQLString) },
+        count: { type: GraphQLInt },
+        price: { type: GraphQLFloat },
+      },
+      async resolve(parent, args, context) {
+        checkToken(context.token);
+        if (!context.user) {
+          throw new Error("Unauthorized");
+        }
+        const user = await Users.findById(context.user.id);
+        if (!user) {
+          throw new Error("User does not exist");
+        }
+        if (user.role !== "manager") {
+          throw new Error("Cannot add a product as a non manager");
+        }
+        const product = await Products.findOne({ name: args.name });
+        if (!product) {
+          throw new Error("Product does not exist!");
+        }
+        if (args.count) product.count = args.count;
+        if (args.price) product.price = args.price;
+        await product.save();
+        return product;
+      },
+    },
     addToBasket: {
       type: ProductType,
       description: "Add a product to user basket",
@@ -356,6 +433,7 @@ const Mutation = new GraphQLObjectType({
         manager: { type: GraphQLNonNull(GraphQLID) },
       },
       async resolve(parent, args, context) {
+        checkToken(context.token);
         if (!context.user) {
           throw new Error("Unauthorized");
         }
@@ -384,6 +462,108 @@ const Mutation = new GraphQLObjectType({
         return product;
       },
     },
+    removeFromBasket: {
+      type: ProductType,
+      description: "Remove a product from user basket",
+      args: {
+        name: { type: GraphQLNonNull(GraphQLString) },
+      },
+      async resolve(parent, args, context) {
+        checkToken(context.token);
+        if (!context.user) {
+          throw new Error("Unauthorized");
+        }
+        const user = await Users.findById(context.user.id);
+        const product = await Products.findOne({
+          name: args.name,
+        });
+        if (!user) {
+          throw new Error("User does not exist");
+        }
+        if (!product) {
+          throw new Error("Product does not exist");
+        }
+
+        await Users.findByIdAndUpdate(context.user.id, {
+          $pull: { basket: product._id },
+        });
+
+        await Products.findByIdAndUpdate(product._id, {
+          $inc: { count: +1 },
+        });
+        return product;
+      },
+    },
+    Payment: {
+      type: PaymentPayload,
+      description: "Payment after checkout",
+      args: {
+        token: { type: GraphQLNonNull(GraphQLString) }, // usually generated on the frontend
+      },
+      async resolve(parent, args, context) {
+        checkToken(context.token);
+        if (!context.user) {
+          throw new Error("Unauthorized");
+        }
+        const user = await Users.findById(context.user.id).populate("basket");
+        const basket = user.basket;
+        const total = basket.reduce((sum, item) => sum + item.price, 0);
+
+        try {
+          const charge = await stripe.charges.create({
+            amount: Math.round(total * 100),
+            currency: "eur",
+            source: args.token, // for testing use tok_visa
+            description: `${user.email} is charged with ${total} EUR`,
+          });
+
+          return {
+            status: charge.status,
+            transactionId: charge.id,
+            amount: total,
+          };
+        } catch (err) {
+          throw new Error(err.message);
+        }
+      },
+    },
+    Logout: {
+      type: GraphQLBoolean,
+      description: "Blacklist token when logging out",
+      async resolve(parent, args, context) {
+        checkToken(context.token);
+        if (!context.user) {
+          throw new Error("Unauthorized");
+        }
+        await redisClient.set(context.token, "Blacklisted", { EX: 1800 });
+        return true;
+      },
+    },
+    deleteUser: {
+      type: UserType,
+      description: "Admin deletes user",
+      args: {
+        email: { type: GraphQLNonNull(GraphQLString) },
+      },
+      async resolve(parent, args, context) {
+        checkToken(context.token);
+        if (!context.user) {
+          throw new Error("Unauthorized");
+        }
+        const user = await Users.findById(context.user.id);
+        if (!user) {
+          throw new Error("User not found");
+        }
+        if (user.role !== "admin") {
+          throw new Error("User is not an admin");
+        }
+        const deletedUser = await Users.findOne({ email: args.email });
+        if (!deletedUser) {
+          throw new Error("User does not exist");
+        }
+        await deletedUser.remove();
+      },
+    },
   }),
 });
 
@@ -391,10 +571,3 @@ module.exports = new GraphQLSchema({
   query: RootQuery,
   mutation: Mutation,
 });
-
-// todo remove prodcts
-// todo remove basket
-// todo restock
-// todo delete user
-// todo logout
-// todo
