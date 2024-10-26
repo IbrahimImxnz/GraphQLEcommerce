@@ -87,6 +87,18 @@ const ProductType = new GraphQLObjectType({
   }),
 });
 
+const OrderType = new GraphQLObjectType({
+  name: "Order",
+  description: "This represents an order",
+  fields: () => ({
+    id: { type: GraphQLNonNull(GraphQLID) },
+    transactionId: { type: GraphQLNonNull(GraphQLString) },
+    userCharged: { type: GraphQLNonNull(GraphQLID) },
+    amount: { type: GraphQLNonNull(GraphQLFloat) },
+    refunded: { type: GraphQLBoolean },
+  }),
+});
+
 const CheckoutPayload = new GraphQLObjectType({
   name: "CheckoutPayload",
   fields: () => ({
@@ -210,6 +222,38 @@ const RootQuery = new GraphQLObjectType({
           basket: basket,
           sum: total,
         };
+      },
+    },
+    personalOrders: {
+      type: OrderType,
+      description: "View user orders",
+      async resolve(parent, args, context) {
+        if (!context.user) {
+          throw new Error("Unauthorized");
+        }
+        const user = await Users.findById(context.user.id);
+        if (!user) {
+          throw new Error("User not found");
+        }
+        return Orders.find({ userCharged: user._id });
+      },
+    },
+    AllOrders: {
+      type: OrderType,
+      description: "View all orders",
+      async resolve(parent, args, context) {
+        if (!context.user) {
+          throw new Error("Unauthorized");
+        }
+        const user = await Users.findById(context.user.id);
+        if (!user) {
+          throw new Error("User not found");
+        }
+        if (user.role !== "admin") {
+          throw new Error("User is not an admin");
+        }
+
+        return Orders.find();
       },
     },
   }),
@@ -589,8 +633,8 @@ const Mutation = new GraphQLObjectType({
         if (!user) {
           throw new Error("User not found");
         }
-        if (user.role !== "manager") {
-          throw new Error("User is not a manager");
+        if (user.role !== "admin") {
+          throw new Error("User is not a admin");
         }
         const order = await Orders.findOne({
           transactionId: args.transactionId,
