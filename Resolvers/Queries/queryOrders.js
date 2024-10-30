@@ -7,8 +7,9 @@ exports.personalOrders = {
   type: OrderType,
   description: "View user orders",
   async resolve(parent, args, context) {
-    if (!checkToken(context.token)) {
-      throw new Error("Token is blacklisted");
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
     }
     if (!context.user) {
       throw new Error("Unauthorized");
@@ -25,8 +26,9 @@ exports.AllOrders = {
   type: OrderType,
   description: "View all orders",
   async resolve(parent, args, context) {
-    if (!checkToken(context.token)) {
-      throw new Error("Token is blacklisted");
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
     }
     if (!context.user) {
       throw new Error("Unauthorized");
