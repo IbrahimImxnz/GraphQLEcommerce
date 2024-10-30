@@ -1,7 +1,7 @@
 const { GraphQLObjectType, GraphQLString } = require("graphql");
 const UserType = require("./userType");
 
-exports.AuthPayloadType = new GraphQLObjectType({
+const AuthPayloadType = new GraphQLObjectType({
   name: "AuthPayload",
   description: "Authentication payload with user data and token",
   fields: () => ({
@@ -9,3 +9,5 @@ exports.AuthPayloadType = new GraphQLObjectType({
     token: { type: GraphQLString },
   }),
 });
+
+module.exports = AuthPayloadType;

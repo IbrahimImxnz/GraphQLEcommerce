@@ -24,20 +24,6 @@ const { Payment } = require("../Resolvers/Mutations/payment");
 const { refundPayment } = require("../Resolvers/Mutations/refund");
 const { Logout } = require("../Resolvers/Mutations/logout");
 
-const redisClient = redis.createClient(process.env.REDIS_URL);
-
-(async () => {
-  await redisClient.connect();
-})();
-
-redisClient.on("ready", () => {
-  console.log("Redis connected");
-});
-
-redisClient.on("error", (err) => {
-  console.log(err);
-});
-
 const RootQuery = new GraphQLObjectType({
   name: "RootQueryType",
   description: "Root Query",
@@ -77,4 +63,13 @@ module.exports = new GraphQLSchema({
   query: RootQuery,
   mutation: Mutation,
 });
-module.exports = redisClient;
+// module.exports = redisClient;
+
+/*
+module.exports = {
+  schema: new GraphQLSchema({
+    query: RootQuery,
+    mutation: Mutation,
+  }),
+  redisClient,
+};*/

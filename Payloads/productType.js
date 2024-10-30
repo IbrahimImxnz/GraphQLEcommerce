@@ -7,7 +7,7 @@ const {
   GraphQLFloat,
 } = require("graphql");
 
-exports.ProductType = new GraphQLObjectType({
+const ProductType = new GraphQLObjectType({
   name: "Product",
   description: "This represents a product",
   fields: () => ({
@@ -18,3 +18,5 @@ exports.ProductType = new GraphQLObjectType({
     price: { type: GraphQLNonNull(GraphQLFloat) },
   }),
 });
+
+module.exports = ProductType;

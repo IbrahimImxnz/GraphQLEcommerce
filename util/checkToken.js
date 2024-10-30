@@ -1,12 +1,19 @@
-const redisClient = require("../GQLSchemas/schema");
+const redisClient = require("./redisClient");
 
-exports.checkToken = async (token) => {
+const checkToken = async (token) => {
   if (!token) {
     throw new Error("Unauthorized");
   }
 
-  const isBlacklisted = await redisClient.get(token);
-  if (isBlacklisted) {
-    throw new Error("Token is blacklisted");
+  if (!redisClient.isOpen) {
+    await redisClient.connect();
   }
+
+  const isBlacklisted = await redisClient.get(token);
+  /*if (isBlacklisted) {
+    throw new Error("Token is blacklisted");
+  }*/
+  return !isBlacklisted;
 };
+
+module.exports = checkToken;

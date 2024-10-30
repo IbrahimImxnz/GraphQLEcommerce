@@ -1,11 +1,15 @@
 const Orders = require("../../models/orders");
 const Users = require("../../models/users");
 const OrderType = require("../../Payloads/orderType");
+const checkToken = require("../../util/checkToken");
 
 exports.personalOrders = {
   type: OrderType,
   description: "View user orders",
   async resolve(parent, args, context) {
+    if (!checkToken(context.token)) {
+      throw new Error("Token is blacklisted");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }
@@ -21,6 +25,9 @@ exports.AllOrders = {
   type: OrderType,
   description: "View all orders",
   async resolve(parent, args, context) {
+    if (!checkToken(context.token)) {
+      throw new Error("Token is blacklisted");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }

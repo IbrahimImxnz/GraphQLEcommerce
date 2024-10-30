@@ -1,6 +1,6 @@
 const { GraphQLObjectType, GraphQLString, GraphQLFloat } = require("graphql");
 
-exports.PaymentPayload = new GraphQLObjectType({
+const PaymentPayload = new GraphQLObjectType({
   name: "PaymentPayload",
   fields: () => ({
     status: { type: GraphQLString },
@@ -8,3 +8,5 @@ exports.PaymentPayload = new GraphQLObjectType({
     amount: { type: GraphQLFloat },
   }),
 });
+
+module.exports = PaymentPayload;

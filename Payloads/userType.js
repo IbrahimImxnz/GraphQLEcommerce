@@ -7,8 +7,9 @@ const {
   GraphQLFloat,
 } = require("graphql");
 const Users = require("../models/users");
+const ProductType = require("../Payloads/productType");
 
-exports.UserType = new GraphQLObjectType({
+const UserType = new GraphQLObjectType({
   name: "User",
   description: "This represents a user",
   fields: () => ({
@@ -35,3 +36,5 @@ exports.UserType = new GraphQLObjectType({
     productDescription: { type: GraphQLString },
   }),
 });
+
+module.exports = UserType;

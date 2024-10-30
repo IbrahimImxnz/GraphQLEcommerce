@@ -10,7 +10,10 @@ exports.user = {
     id: { type: GraphQLID },
   },
   async resolve(parent, args, context) {
-    checkToken(context.token);
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }
@@ -30,7 +33,10 @@ exports.users = {
   type: new GraphQLList(UserType),
   description: "All Users",
   async resolve(parent, args, context) {
-    checkToken(context.token);
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }

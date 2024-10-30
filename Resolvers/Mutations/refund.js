@@ -2,6 +2,7 @@ const { GraphQLString, GraphQLNonNull, GraphQLBoolean } = require("graphql");
 const Users = require("../../models/users");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_API_KEY);
+const checkToken = require("../../util/checkToken");
 
 exports.refundPayment = {
   type: GraphQLBoolean,
@@ -11,6 +12,10 @@ exports.refundPayment = {
     reason: { type: GraphQLString },
   },
   async resolve(parent, args, context) {
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }

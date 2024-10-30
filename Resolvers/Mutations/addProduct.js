@@ -18,7 +18,10 @@ exports.addProduct = {
     price: { type: GraphQLNonNull(GraphQLFloat) },
   },
   async resolve(parent, args, context) {
-    checkToken(context.token);
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }

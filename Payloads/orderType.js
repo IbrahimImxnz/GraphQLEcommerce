@@ -7,7 +7,7 @@ const {
   GraphQLBoolean,
 } = require("graphql");
 
-exports.OrderType = new GraphQLObjectType({
+const OrderType = new GraphQLObjectType({
   name: "Order",
   description: "This represents an order",
   fields: () => ({
@@ -18,3 +18,5 @@ exports.OrderType = new GraphQLObjectType({
     refunded: { type: GraphQLBoolean },
   }),
 });
+
+module.exports = OrderType;

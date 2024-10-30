@@ -10,8 +10,11 @@ exports.products = {
   args: {
     manager: { type: GraphQLNonNull(GraphQLID) },
   },
-  resolve(parent, args, context) {
-    checkToken(context.token);
+  async resolve(parent, args, context) {
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }
@@ -23,7 +26,10 @@ exports.basket = {
   type: new GraphQLList(ProductType),
   description: "User basket",
   async resolve(parent, args, context) {
-    checkToken(context.token);
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }

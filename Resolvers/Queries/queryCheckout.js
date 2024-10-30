@@ -6,7 +6,10 @@ exports.Checkout = {
   type: CheckoutPayload,
   description: "User checkout",
   async resolve(parent, args, context) {
-    checkToken(context.token);
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }
