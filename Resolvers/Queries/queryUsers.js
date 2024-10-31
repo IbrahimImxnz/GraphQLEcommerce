@@ -55,6 +55,5 @@ exports.users = {
 exports.managers = {
   type: new GraphQLList(UserType),
   description: "List of managers",
-  resolve: (parent, args) =>
-    Users.find({ role: "manager" }).select("username productDescription"),
+  resolve: (parent, args) => Users.find({ role: "manager" }),
 };

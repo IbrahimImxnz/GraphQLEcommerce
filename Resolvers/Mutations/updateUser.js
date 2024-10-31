@@ -2,6 +2,7 @@ const { GraphQLString, GraphQLInt, GraphQLNonNull } = require("graphql");
 const UserType = require("../../Payloads/userType");
 const checkToken = require("../../util/checkToken");
 const Users = require("../../models/users");
+require("dotenv").config();
 
 exports.update = {
   type: UserType,
@@ -56,7 +57,10 @@ exports.changeRole = {
     productDescription: { type: GraphQLString },
   },
   async resolve(parent, args, context) {
-    checkToken(context.token);
+    const tokenStatus = await checkToken(context.token);
+    if (!tokenStatus) {
+      throw new Error("User is logged out");
+    }
     if (!context.user) {
       throw new Error("Unauthorized");
     }
