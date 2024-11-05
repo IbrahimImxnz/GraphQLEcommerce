@@ -9,18 +9,18 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                sh 'npm i'
+                bat 'npm i'
             }
         }
         stage('Run Tests') {
             steps {
-                sh "npm test"
+                bat "npm test"
             }
         }
         /*
         stage('Run nodemon dev server'){
             steps {
-                sh 'npm run devStart'
+                bat 'npm run devStart'
             }
         } */ // testing nodemon
     }
