@@ -11,12 +11,19 @@ pipeline {
             steps {
                 bat 'npm i'
             }
-        }/*
+        }
         stage('Run Lint') {
             steps {
-                bat "npm run lint" 
+                script {
+                    try {
+                        bat 'npm run lint'
+                    } catch (Exception e) {
+                        currentBuild.result = 'UNSTABLE',
+                        echo 'Jslint errors occurred' 
+                    }
+                } // this way jslint will not stop the build anymore if an error occurs
             }
-        } */
+        }
         stage('Run Tests') {
             steps {
                 bat "npm test"
