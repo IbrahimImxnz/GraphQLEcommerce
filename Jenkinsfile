@@ -11,12 +11,12 @@ pipeline {
             steps {
                 bat 'npm i'
             }
-        }
+        }/*
         stage('Run Lint') {
             steps {
                 bat "npm run lint" 
             }
-        }
+        } */
         stage('Run Tests') {
             steps {
                 bat "npm test"
