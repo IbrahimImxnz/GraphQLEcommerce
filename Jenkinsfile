@@ -44,9 +44,24 @@ pipeline {
         }
         success {
             echo 'Build succeeded!'
+            emailext (
+            subject: "Jenkins Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: "Build completed successfully. Check console output at ${env.BUILD_URL}.",
+            )
         }
         failure {
             echo 'Build failed.'
+            emailext (
+            subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: "Build completed unsuccessfully. Check console output at ${env.BUILD_URL}.",
+            )
+        }
+        unstable {
+            echo 'Build unstable.'
+            emailext (
+            subject: "Jenkins Build Unstable: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: "Build is completed but unstable. Check console output at ${env.BUILD_URL}.",
+            )
         }
     }
 }
