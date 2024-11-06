@@ -12,6 +12,11 @@ pipeline {
                 bat 'npm i'
             }
         }
+        stage('Run Lint') {
+            steps {
+                bat "npm run lint || exit 1" // build stops if linter fails outputing a non zero status
+            }
+        }
         stage('Run Tests') {
             steps {
                 bat "npm test"

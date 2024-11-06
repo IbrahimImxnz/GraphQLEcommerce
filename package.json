@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --coverage",
-    "devStart": "nodemon server.js"
+    "devStart": "nodemon server.js",
+    "lint": "jslint **/*.js"
   },
   "keywords": [],
   "author": "",
