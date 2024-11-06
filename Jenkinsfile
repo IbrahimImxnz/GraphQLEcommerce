@@ -36,7 +36,7 @@ pipeline {
             }
         } */ // testing nodemon
     }
-
+// t
     post {
         always { // always archvie even if failure occurs
             archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true // save all coverage file and if empty continue
