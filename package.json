@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest --coverage",
     "devStart": "nodemon server.js",
-    "lint": "eslint . --ext .js"
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
