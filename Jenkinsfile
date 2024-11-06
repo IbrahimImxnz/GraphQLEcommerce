@@ -18,7 +18,7 @@ pipeline {
                     try {
                         bat 'npm run lint'
                     } catch (Exception e) {
-                        currentBuild.result = 'UNSTABLE',
+                        currentBuild.result = 'UNSTABLE'
                         echo 'Jslint errors occurred' 
                     }
                 } // this way jslint will not stop the build anymore if an error occurs
