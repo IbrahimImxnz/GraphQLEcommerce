@@ -7,7 +7,7 @@ const schema = require("./GQLSchemas/schema");
 const jwt = require("jsonwebtoken");
 
 connectDB();
-// testt
+// testtt
 // app.use(checkToken)
 app.use(
   "/",
