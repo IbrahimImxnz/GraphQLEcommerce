@@ -48,7 +48,6 @@ pipeline {
             subject: "Jenkins Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build completed successfully. Check console output at ${env.BUILD_URL}.",
             to: "ibrahimpartey70@gmail.com",
-            from: "ibrahimpartey70@gmail.com"
             )
         }
         failure {
@@ -57,7 +56,6 @@ pipeline {
             subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build completed unsuccessfully. Check console output at ${env.BUILD_URL}.",
             to: "ibrahimpartey70@gmail.com",
-            from: "ibrahimpartey70@gmail.com"
             )
         }
         unstable {
@@ -66,7 +64,6 @@ pipeline {
             subject: "Jenkins Build Unstable: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build is completed but unstable. Check console output at ${env.BUILD_URL}.",
             to: "ibrahimpartey70@gmail.com",
-            from: "ibrahimpartey70@gmail.com"
             )
         }
     }
