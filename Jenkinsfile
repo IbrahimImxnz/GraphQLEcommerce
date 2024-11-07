@@ -64,6 +64,7 @@ pipeline {
             subject: "Jenkins Build Unstable: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: "Build is completed but unstable. Check console output at ${env.BUILD_URL}.",
             to: "ibrahimpartey70@gmail.com",
+            from: "ibrahimpartey70@gmail.com"
             )
         }
     }
