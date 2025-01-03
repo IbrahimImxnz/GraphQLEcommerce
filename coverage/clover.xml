@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1730873435550" clover="3.2.0">
-  <project timestamp="1730873435550" name="All files">
+<coverage generated="1731724049442" clover="3.2.0">
+  <project timestamp="1731724049442" name="All files">
     <metrics statements="181" coveredstatements="141" conditionals="65" coveredconditionals="51" methods="22" coveredmethods="9" elements="268" coveredelements="201" complexity="0" loc="181" ncloc="181" packages="5" files="13" classes="13"/>
     <package name="Payloads">
       <metrics statements="21" coveredstatements="12" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="0"/>
@@ -199,8 +199,8 @@
         <line num="8" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="9" count="0" type="stmt"/>
         <line num="12" count="0" type="stmt"/>
-        <line num="16" count="0" type="stmt"/>
-        <line num="19" count="2" type="stmt"/>
+        <line num="13" count="0" type="stmt"/>
+        <line num="16" count="2" type="stmt"/>
       </file>
       <file name="jwtAuthenticator.js" path="C:\Users\imxnz\GraphQLECommerce\util\jwtAuthenticator.js">
         <metrics statements="4" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>

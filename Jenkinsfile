@@ -7,6 +7,32 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('Build image') {
+            steps {
+                echo 'Building image of app'
+                script {
+                    bat 'docker build -t ibrahimmaaly/GraphQLApp:latest .'
+                }
+            }
+        }
+
+        stage('Run Compose') {
+            steps {
+                script{
+                    bat 'docker-compose -f dockerCompose.yml up --build -d'
+                }
+            }
+        }
+
+        stage('Push to Registry') {
+            steps {
+                script{
+
+                }
+            }
+        }
+        /*
         stage('Install Dependencies') {
             steps {
                 bat 'npm i'
@@ -38,6 +64,7 @@ pipeline {
     }
 // tt
     post {
+        /*
         always { // always archvie even if failure occurs
             archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true // save all coverage file and if empty continue
             echo 'Coverage logs have been archived.'
@@ -66,6 +93,6 @@ pipeline {
             to: "ibrahimpartey70@gmail.com",
             from: "ibrahimpartey70@gmail.com"
             )
-        }
+        }*/
     }
 }
