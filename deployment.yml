@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphql-ecommerce
+  labels:
+    app: graphql-ecommerce
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: graphql-ecommerce
+  template:
+    metadata:
+      labels:
+        app: graphql-ecommerce
+    spec:
+      containers:
+        - name: graphql-ecommerce
+          image: ibrahimmaaly/graphqlapp:latest
+          ports:
+            - containerPort: 443
+          envFrom:
+            - secretRef:
+                name: graphql-ecommerce-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphql-ecommerce-service
+spec:
+  selector:
+    app: graphql-ecommerce
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 443

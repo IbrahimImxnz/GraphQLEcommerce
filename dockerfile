@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 443
 
-CMD ["npm", "devStart"]
+CMD ["npm", "run", "devStart"]
