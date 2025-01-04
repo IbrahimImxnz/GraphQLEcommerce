@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script{
                     withCredentials([file(credentialsId: '.env', variable: 'ENV_FILE')]) {
-                        bat 'copy $ENV_FILE .env'
+                        bat 'copy %ENV_FILE% .env'
                     }
                     bat 'docker-compose -f dockerCompose.yml up --build -d'
                 }
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 script{
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: "DOCKERHUB_USERNAME", passwordVariable: "DOCKERHUB_PASSWORD")]){
-                        bat 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                        bat 'docker login -u %DOCKERHUB_USERNAME% -p %DOCKERHUB_PASSWORD%'
                     }
 
                     bat 'docker push ibrahimmaaly/graphqlapp:latest'
