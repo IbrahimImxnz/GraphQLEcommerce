@@ -12,7 +12,7 @@ pipeline {
             steps {
                 echo 'Building image of app'
                 script {
-                    bat 'docker build -t ibrahimmaaly/GraphQLApp:latest .'
+                    bat 'docker build -t ibrahimmaaly/graphqlapp:latest .'
                 }
             }
         }
@@ -28,7 +28,11 @@ pipeline {
         stage('Push to Registry') {
             steps {
                 script{
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: "DOCKERHUB_USERNAME", passwordVariable: "DOCKERHUB_PASSWORD")]){
+                        bat 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                    }
 
+                    bat 'docker push ibrahimmaaly/graphqlapp:latest'
                 }
             }
         }
