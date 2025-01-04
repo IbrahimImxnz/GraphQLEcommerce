@@ -66,8 +66,8 @@ pipeline {
             }
         } */ // testing nodemon
     }
-// tt
-    post {
+// tt 
+  /*  post {
         /*
         always { // always archvie even if failure occurs
             archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true // save all coverage file and if empty continue
@@ -97,6 +97,6 @@ pipeline {
             to: "ibrahimpartey70@gmail.com",
             from: "ibrahimpartey70@gmail.com"
             )
-        }*/
-    }
+        }
+    }*/
 }
