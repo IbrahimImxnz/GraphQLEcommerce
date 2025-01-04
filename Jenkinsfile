@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script{
                     withCredentials([file(credentialsId: '.env', variable: 'ENV_FILE')]) {
-                        bat 'cp $ENV_FILE .env'
+                        bat 'copy $ENV_FILE .env'
                     }
                     bat 'docker-compose -f dockerCompose.yml up --build -d'
                 }
