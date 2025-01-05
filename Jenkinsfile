@@ -39,6 +39,15 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    bat 'kubectl apply -f deployment.yml'
+                    bat 'kubectl rollout status deployment/graphql-ecommerce'
+                }
+            }
+        }
         /*
         stage('Install Dependencies') {
             steps {

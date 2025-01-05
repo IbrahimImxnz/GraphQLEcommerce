@@ -21,7 +21,7 @@ spec:
             - containerPort: 443
           envFrom:
             - secretRef:
-                name: graphql-ecommerce-env
+                name: graphql-ecommerce-env #kubectl create secret generic graphql-ecommerce-env --from-env-file=C:\Users\imxnz\GraphQLECommerce\.env
 ---
 apiVersion: v1
 kind: Service
