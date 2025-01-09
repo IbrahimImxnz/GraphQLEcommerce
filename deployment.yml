@@ -18,7 +18,7 @@ spec:
         - name: graphql-ecommerce
           image: ibrahimmaaly/graphqlapp:latest
           ports:
-            - containerPort: 443
+            - containerPort: 9000
           envFrom:
             - secretRef:
                 name: graphql-ecommerce-env #kubectl create secret generic graphql-ecommerce-env --from-env-file=C:\Users\imxnz\GraphQLECommerce\.env
@@ -33,5 +33,6 @@ spec:
   type: LoadBalancer
   ports:
     - protocol: TCP
-      port: 443
-      targetPort: 443
+      port: 9000
+      targetPort: 9000
+      nodePort: 30001

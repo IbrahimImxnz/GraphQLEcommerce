@@ -3,7 +3,7 @@ services:
     build:
       context: .
     ports:
-      - "443:443"
+      - "9000:9000"
     depends_on:
       - mongo
       - redis
@@ -13,7 +13,7 @@ services:
       - .:/usr/src/app
 
   mongo:
-    image: mongo
+    image: mongo:7.0.12
     #container_name: mongodb
     ports:
       - "27017:27017"
@@ -21,7 +21,7 @@ services:
       - mongo-data:/data/db
 
   redis:
-    image: redis:7
+    image: redis:5.0.14
     #container_name: redisdb
     ports:
       - "6379:6379"
